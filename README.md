@@ -471,7 +471,9 @@ $$\sigma_{\mathrm{shelf\_loc}\ \mathrm{LIKE}\ \texttt{'A\%'}}(\textsc{copy})$$
 SQL:
 
 ```sql
--- write your query here
+SELECT * 
+FROM copy 
+WHERE shelf_loc LIKE 'A%';
 ```
 
 > Expected result: copy\_no 1 and 2.
@@ -486,7 +488,8 @@ $$\pi_{\mathrm{title},\,\mathrm{pub\_year}}(\textsc{book})$$
 SQL:
 
 ```sql
--- write your query here
+SELECT title, pub_year 
+FROM book;
 ```
 
 > Expected result: three rows, two columns each.
@@ -502,7 +505,9 @@ $$\pi_{\mathrm{isbn},\,\mathrm{shelf\_loc}}\!\left(\sigma_{\mathrm{shelf\_loc} \
 SQL:
 
 ```sql
--- write your query here
+SELECT isbn, shelf_loc 
+FROM copy 
+WHERE shelf_loc >= 'B';
 ```
 
 > Expected result: copy\_no 3 (B-07) and copy\_no 4 (C-12).
@@ -523,7 +528,12 @@ $$\pi_{\mathrm{full\_name},\,\mathrm{title}}\!\left(
 SQL:
 
 ```sql
--- write your query here
+SELECT member.full_name, book.title
+FROM loan
+JOIN member ON loan.member_no = member.member_no
+JOIN copy   ON loan.copy_no = copy.copy_no
+JOIN book   ON copy.isbn = book.isbn
+WHERE loan.return_date IS NULL;
 ```
 
 > Expected result: two rows – Schneider borrowing *Database Management Systems*,
@@ -553,7 +563,7 @@ not in a `WHERE` clause. What would happen to Koch's row if you moved this
 condition into `WHERE return_date IS NULL`? Why? Refer to the formal definition
 of the outer join from Lecture 03.
 
-> *Your answer:*
+> Koch's row would be dropped (filtered out) and disappear from the results
 
 ### Task 4f – Set Difference
 
@@ -567,7 +577,9 @@ $$\pi_{\mathrm{isbn}}(\textsc{book}) - \pi_{\mathrm{isbn}}\!\left(\textsc{copy} 
 In SQL, set difference is expressed with `EXCEPT`:
 
 ```sql
--- write your query here
+SELECT isbn FROM book
+EXCEPT
+SELECT isbn FROM copy JOIN loan ON copy.copy_no = loan.copy_no;
 ```
 
 > Expected result: *The C Programming Language* (copy 4 was never loaned).
@@ -601,7 +613,7 @@ VALUES (999, 1, '2026-05-01');
 > **Question 5.1:** Which specific constraint fired? Name the table and the
 > foreign key column involved.
 >
-> *Your answer:*
+> Table: loan, Foreign Key Column: member_no .... The database stopped the operation because the member_no 999 does not exist in the member table. Since PRAGMA foreign_keys = ON was active, the database enforced the referential integrity rule defined in your schema, preventing a "child" record (the loan) from existing without a valid "parent" record (the member).
 
 ### Task 5b – Delete a member with active loans
 
@@ -617,7 +629,7 @@ DELETE FROM member WHERE member_no = 102;
 > `DELETE`. What happens to Schneider's loan row? Is this behaviour desirable
 > for a library system? Justify your answer.
 >
-> *Your answer:*
+> If ON DELETE CASCADE were used, Schneider’s loan row would be automatically deleted without warning, which is undesirable because it destroys the library's only record of who physically possesses the book. This creates a security risk where members could keep books permanently without any accountability or audit trail left in the system.
 
 ### Task 5c – Verify the composite primary key of `writes`
 
@@ -631,7 +643,7 @@ INSERT INTO writes VALUES (1, '978-0-201-96426-4');
 > here – but also a *primary key*. Can a relation have two candidate keys? Give
 > an example from the library schema.
 >
-> *Your answer:*
+> Yes, a relation can have multiple candidate keys because a primary key is simply the specific candidate key chosen by the designer to be the main identifier for the table. An example from our library schema is the member table, which has two candidate keys: member_no (the primary key) and email (marked as UNIQUE), as both are guaranteed to uniquely identify a single member record.
 
 ---
 
@@ -736,7 +748,8 @@ If you have not used `scp` before, work through this exercise first:
 > **Screenshot 3:** Take a screenshot of `schema.svg` showing all six entities
 > and all five relationships, and insert it here.
 >
-> `[insert screenshot]`
+><img width="1044" height="682" alt="grafik" src="https://github.com/user-attachments/assets/2a677dfc-6570-486d-baeb-e27f72ca206b" />
+
 
 Add `schema.svg` to `.gitignore` (it is generated, not authored):
 
