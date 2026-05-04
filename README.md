@@ -794,7 +794,7 @@ joins. SQL does not prescribe an execution order; the query optimizer may
 reorder these joins freely. Under what condition would reordering a join change
 the *result* of a query? Under what condition is it always safe?
 
-> *Your answer:*
+> Reordering is always safe for inner joins because they are associative, meaning the result remains identical regardless of the sequence. However, reordering will change the result when outer joins are involved, as the specific order of tables determines which records are preserved and which are padded with nulls.
 
 **Question B – NULL semantics:**  
 `return_date` is `NULL` for an open loan. `NULL` in SQL does not mean zero or
@@ -802,7 +802,7 @@ false – it means *unknown*. Consider the query `WHERE return_date = NULL`.
 Will it return the open loans? Explain why or why not and write the correct
 form.
 
-> *Your answer:*
+> Nope, it will not return the open loans. In SQL, any direct comparison with NULL using = results in UNKNOWN rather than true or false; since the WHERE clause only accepts TRUE results, the rows are filtered out. The correct form is: WHERE return_date IS NULL;
 
 **Question C – Surrogate vs. natural key:**  
 `book` uses `isbn` as its natural primary key; all other entities use surrogate
@@ -810,7 +810,7 @@ integer keys. Suppose the library occasionally receives books without an ISBN
 (unpublished manuscripts, internal reports). How would this affect the `isbn`
 primary key? What design change would you make?
 
-> *Your answer:*
+> Since a primary key must be unique and non-null, books without an ISBN could not be stored in the database. To fix this, you should switch to a surrogate integer key (like book_id) as the primary key and move isbn to a separate column that allows NULLs but maintains a UNIQUE constraint.
 
 **Question D – Relational algebra limitations:**  
 Suppose the library wants to find all members who have borrowed the same copy
@@ -820,12 +820,13 @@ operators of the relational algebra (σ, π, ρ, ×, −) without aggregation?
 What does this tell you about the relationship between relational algebra and
 SQL?
 
-> *Your answer:*
+> SQL Query: SELECT member_no, copy_no FROM loan GROUP BY member_no, copy_no HAVING COUNT(*) > 1; yes, this can be expressed in basic algebra using a self-join (finding rows where IDs differ but member and copy match). This demonstrates that while basic algebra can identify duplicates via self-joins, SQL’s aggregation functions make complex data analysis much more practical and expressive.
 
 > **Screenshot 4:** Take a screenshot of your terminal showing the output of
 > the query from Task 4d (the join across four relations), and insert it here.
 >
-> `[insert screenshot]`
+> <img width="784" height="346" alt="grafik" src="https://github.com/user-attachments/assets/ecd2a7b0-ccc8-4fdd-8209-72ad3fbeb069" />
+
 
 ---
 
