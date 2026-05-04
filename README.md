@@ -176,14 +176,14 @@ Complete the sketch for all six relations (`author`, `book`, `writes`, `copy`,
 > relational model? What would go wrong if you stored multiple author IDs in a
 > single column of `book`?
 >
-> *Your answer:*
+> Storing multiple author IDs in a single column violates First Normal Form (1NF), which requires atomic (single) values. If you do this, querying >the data (like finding all books by a specific author) becomes extremely slow and difficult, and you cannot use standard SQL JOIN operations. A >dedicated join table cleanly breaks the N:M relationship into two manageable 1:N relationships.
 
 > **Question 1.2:** `loan_id` is a surrogate key even though a loan might seem
 > to be uniquely identified by `(member_no, copy_no, loan_date)`. Name one
 > realistic scenario in which that composite key would fail to be a candidate
 > key.
 >
-> *Your answer:*
+> It would fail if a member borrows a book, returns it, and then realizes they need it and borrows the exact same copy again on the same day. The >member_no, copy_no, and loan_date would be identical to the first loan, causing a primary key violation. A surrogate loan_id prevents this >conflict.
 
 ---
 
@@ -348,12 +348,12 @@ git log --oneline
 `writes`. What does this mean in practice if a librarian wants to delete an
 author who has written at least one book in the catalogue?
 
-> *Your answer:*
+> The database will block the deletion and return an error. Because of RESTRICT, you cannot delete an author as long as there are rows in the writes table referencing that author's ID.
 
 **Question 2.2:** `email` in `member` is declared `UNIQUE` but is not the
 primary key. Using the vocabulary from Lecture 03, what kind of key is it?
 
-> *Your answer:*
+> It is a Candidate Key (or Alternate Key).
 
 **Question 2.3:** SQLite does not enforce `CHECK` or `FOREIGN KEY` constraints
 by default. Run the following and observe what happens:
@@ -376,7 +376,7 @@ by default. Run the following and observe what happens:
 > the difference between a constraint declared in DDL and one actually enforced
 > at runtime?
 
-> *Your answer:*
+> Runtime error: FOREIGN KEY constraint failed The Difference is: DDL only defines the structure and rules of the database, but the database engine must be explicitly configured to enforce those rules during runtime operations (like using PRAGMA foreign_keys = ON in SQLite). Without runtime enforcement, the constraints are defined but ignored.
 
 ---
 
@@ -748,7 +748,8 @@ If you have not used `scp` before, work through this exercise first:
 > **Screenshot 3:** Take a screenshot of `schema.svg` showing all six entities
 > and all five relationships, and insert it here.
 >
-><img width="1044" height="682" alt="grafik" src="https://github.com/user-attachments/assets/2a677dfc-6570-486d-baeb-e27f72ca206b" />
+><img width="835" height="682" alt="grafik" src="https://github.com/user-attachments/assets/66396827-ff7f-4019-b13e-64ff5641a70a" />
+
 
 
 Add `schema.svg` to `.gitignore` (it is generated, not authored):
